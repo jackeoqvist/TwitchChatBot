@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net.Sockets;
 using System.IO;
+using TwitchChatBot.Properties;
 
 namespace TwitchChatBot
 {
@@ -21,14 +22,46 @@ namespace TwitchChatBot
 
         public Form1()
         {
-            this.userName = "swejacke".ToLower();
-            this.channelName = userName;
-            this.password = File.ReadAllText("pass.txt");
+            this.userName = Settings.Default.UserName.ToLower();
+            this.channelName = Settings.Default.ChannelName.ToLower();
+            this.password = Settings.Default.oathkey;
             chatCommandId = "PRIVMSG";
             chatMessagePrefix = $":{userName}!{userName}@{userName}.tmi.twitch.tv {chatCommandId} #{channelName} :";
 
             InitializeComponent();
             Reconnect();
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            settings s = new settings();
+            s.Show();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                SendMessage(textBox2.Text);
+            }
+            catch { }
+        }
+
+        private void textBox2_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.KeyData == Keys.Enter)
+            {
+                try
+                {
+                    SendMessage(textBox2.Text);
+                }
+                catch { }
+            }
         }
 
         private void Reconnect()
@@ -76,8 +109,8 @@ namespace TwitchChatBot
         }
 
         void ReceiveMessage(string speaker, string message)
-        {
-            label1.Text += $"\r\n{speaker}: {message}";
+        { 
+            textBox1.AppendText($"{speaker}: {message}\r\n");
 
             if (message.StartsWith("!hi"))
             {
